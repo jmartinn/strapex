@@ -87,7 +87,12 @@ mod strapex_factory {
 
     #[constructor]
     // Constructor to initialize the contract with an owner.
-    fn constructor(ref self: ContractState, owner: ContractAddress, childHash: ClassHash, depositToken: ContractAddress) {
+    fn constructor(
+        ref self: ContractState,
+        owner: ContractAddress,
+        childHash: ClassHash,
+        depositToken: ContractAddress
+    ) {
         self.totalStrapexAccountsNo.write(0);
         self.strapexChildHash.write(childHash);
         self.depositToken.write(depositToken);
@@ -95,7 +100,7 @@ mod strapex_factory {
     }
 
     #[abi(embed_v0)]
-    // Implementation of IStrapexFactory interface for contract functionality. Lol
+    // Implementation of IStrapexFactory interface for contract functionality.
     impl IStrapexFactory of super::IStrapexFactory<ContractState> {
         fn create_strapex_contract(ref self: ContractState) -> ContractAddress {
             let token_addr: ContractAddress = self.depositToken.read();
@@ -177,9 +182,9 @@ mod strapex_factory {
         }
 
         fn get_childClassHash(self: @ContractState) -> ClassHash {
-            assert!(self.strapexChildHash.read().is_zero(), "Child class hash is zero");
-            // Retrieves the class hash of the child Strapex contracts.
-            self.strapexChildHash.read()
+            let currentHash = self.strapexChildHash.read();
+            assert!(!currentHash.is_zero(), "Child class hash is zero");
+            currentHash
         }
     }
 }
