@@ -1,1 +1,27 @@
-Strapex Labs Inc. is the original author of this project. When using or distributing this project, please include a mention of Strapex with a link to [strapex.org](https://strapex.org).
+This project, Strapex, is licensed under the Apache License, Version 2.0.  
+You may obtain a copy of the license at:  
+
+<http://www.apache.org/licenses/LICENSE-2.0>  
+
+### Copyright Notices  
+
+Copyright 2025 Strapex Labs Inc.  
+
+This software was developed by Strapex Labs Inc. When using or distributing this project, please include the following attribution:  
+
+> "Originally developed by Strapex Labs Inc."  
+> For more information, visit [https://strapex.org](https://strapex.org).  
+
+### Third-Party Notices  
+
+This project includes code from the following third-party projects, distributed under their respective licenses:  
+
+1. **[Third-party Library Name]**  
+   Copyright [YYYY] [Owner of Third-party Library].  
+   Licensed under the [Name of License].  
+   ([URL or Source for the license])  
+
+2. **[Another Third-party Library Name]**  
+   Copyright [YYYY] [Owner of Another Third-party Library].  
+   Licensed under the [Name of License].  
+   ([URL or Source for the license])  
