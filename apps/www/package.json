@@ -1,0 +1,13 @@
+{
+  "name": "www",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Running landing page in dev mode\"",
+    "build": "echo \"Building landing page\"",
+    "clean": "rm -rf .next",
+    "start": "echo \"Starting landing page\"",
+    "lint": "echo \"Linting landing page\""
+  },
+  "devDependencies": {}
+}
