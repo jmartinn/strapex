@@ -73,9 +73,8 @@ Our project uses Turborepo with pnpm workspaces. The repository is structured as
 
 ```
 apps/
-  ├── www/          # Landing page
-  ├── dashboard/    # Payment gateway interface
-  └── api/          # Backend services
+  ├── dashboard/        # Payment gateway interface
+  └── backend/          # Backend services
 
 packages/
   ├── sdk/          # TypeScript SDK
