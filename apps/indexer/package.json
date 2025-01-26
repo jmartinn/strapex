@@ -1,5 +1,5 @@
 {
-  "name": "apibara-strapex",
+  "name": "@strapex/indexer",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
