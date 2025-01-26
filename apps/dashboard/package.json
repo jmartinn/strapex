@@ -1,5 +1,5 @@
 {
-  "name": "kupwork-front",
+  "name": "@strapex/frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
