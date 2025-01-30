@@ -1,9 +1,5 @@
 "use client";
-import {
-  StarknetWindowObject,
-  connect,
-  disconnect,
-} from "starknetkit";
+import dotenv from "dotenv";
 import {
   ReactNode,
   createContext,
@@ -11,12 +7,14 @@ import {
   useEffect,
   useState,
 } from "react";
+import * as Realm from "realm-web";
 import { Account, Contract, num } from "starknet";
+import { StarknetWindowObject, connect, disconnect } from "starknetkit";
+
 import { useProvider } from "./ProviderContext";
-import abi from '../abis/abi.json';
 import { app } from "../../realmconfig";
-import dotenv from 'dotenv';
-import * as Realm from 'realm-web';
+import abi from "../abis/abi.json";
+
 dotenv.config();
 export enum UserMode {
   OWNER = "owner",
@@ -42,7 +40,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userMode, setUserMode] = useState<UserMode>(UserMode.OWNER);
   const [connection, setConnection] = useState<StarknetWindowObject | null>(
-    null
+    null,
   );
   const [account, setAccount] = useState<Account | null>(null);
   const [address, setAddress] = useState<string | null>(null);
@@ -52,7 +50,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // This effect runs only on the client side
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const storedIsLoggedIn = localStorage.getItem("isLoggedIn");
       if (storedIsLoggedIn !== null) {
         setIsLoggedIn(JSON.parse(storedIsLoggedIn));
@@ -87,7 +85,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   // Effect to persist isLoggedIn state to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       console.log(isLoggedIn);
       localStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn));
     }
@@ -95,35 +93,35 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   // Effect to persist userMode state to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem("userMode", userMode);
     }
   }, [userMode]);
 
   // Effect to persist userId state to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem("userId", userId ?? "");
     }
   }, [userId]);
 
   // Effect to persist connection state to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem("connection", JSON.stringify(connection));
     }
   }, [connection]);
 
   // Effect to persist account state to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem("account", JSON.stringify(account));
     }
   }, [account]);
 
   // Effect to persist address state to localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem("address", address ?? "");
     }
   }, [address]);
@@ -142,31 +140,34 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [providerContext]);
 
   const login = async () => {
-    const { wallet } = await connect({ modalMode: "canAsk", provider: providerContext?.provider });
+    const { wallet } = await connect({
+      modalMode: "canAsk",
+      provider: providerContext?.provider,
+    });
 
     if (wallet && wallet.isConnected) {
-      const response = await fetch('/api/generateJWToken', {
-        method: 'POST',
+      const response = await fetch("/api/generateJWToken", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ walletAddress: wallet.selectedAddress }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate JWT token');
+        throw new Error("Failed to generate JWT token");
       }
 
       const { token } = await response.json();
 
       await app.logIn(Realm.Credentials.jwt(token));
-      const userId = app.currentUser?.id; 
+      const userId = app.currentUser?.id;
       console.log("User logged in: ", userId);
 
       setConnection(wallet);
       setAccount(wallet.account);
       setAddress(wallet.selectedAddress);
-      setUserId(userId ?? null); 
+      setUserId(userId ?? null);
       setIsLoggedIn(true);
     }
   };
@@ -179,11 +180,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setConnection(null);
     setAccount(null);
     setAddress(null);
-    setUserId(null); 
+    setUserId(null);
   };
 
   const toggleMode = () =>
-    setUserMode(userMode === UserMode.OWNER ? UserMode.MULTIOWNER : UserMode.OWNER);
+    setUserMode(
+      userMode === UserMode.OWNER ? UserMode.MULTIOWNER : UserMode.OWNER,
+    );
 
   return (
     <UserContext.Provider

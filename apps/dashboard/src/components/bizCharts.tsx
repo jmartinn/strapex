@@ -1,4 +1,5 @@
-{/*
+{
+  /*
 import Chart from 'chart.js/auto';
 import { getRelativePosition } from 'chart.js/helpers';
 
@@ -15,4 +16,5 @@ const chart = new Chart(ctx, {
     }
   }
 });
-*/}
+*/
+}

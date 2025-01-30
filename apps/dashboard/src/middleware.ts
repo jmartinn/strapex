@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.pathname;
@@ -16,5 +16,5 @@ export function middleware(request: NextRequest) {
 
 // Specify the routes where the middleware should run
 export const config = {
-  matcher: ['/:path*'],
+  matcher: ["/:path*"],
 };

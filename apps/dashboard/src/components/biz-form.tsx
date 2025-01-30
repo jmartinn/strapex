@@ -1,27 +1,23 @@
 "use client";
+import React, { useEffect, useState } from "react";
+import { CallData, Contract, cairo, num, BigNumberish } from "starknet";
+
+import abi from "../abis/abi.json";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useProvider } from "@/contexts/ProviderContext";
 import { useUser } from "@/contexts/UserContext";
 import { saveBusinessData } from "@/services/databaseService";
 import { BizWallet } from "@/types";
-import {
-  CallData,
-  Contract,
-  cairo,
-  num,
-  BigNumberish
-} from "starknet";
-import abi from "../abis/abi.json";
-import { useProvider } from "@/contexts/ProviderContext";
 
 // Add additional styles for overriding dark mode background
 const overrideDarkStyles =
   "dark:bg-white dark:border-gray-200 dark:placeholder:text-gray-500";
 
 import { usePathname, useRouter } from "next/navigation";
-import React from "react";
+
 import { getRoute } from "@/utils/getRoute";
 function generateApiKey() {
   return (
@@ -87,7 +83,6 @@ export function BizForm() {
   };
 
   const createContract = async () => {
-
     if (!userContext?.address) {
       alert("Please connect your wallet first!");
       return;
@@ -122,7 +117,9 @@ export function BizForm() {
         console.log(`Transaction hash: ${hx}`);
         alert(`Transaction hash: ${hx}`);
         console.log("Multicall", multiCall);
-        let result = await providerContext?.provider.waitForTransaction(multiCall.transaction_hash);
+        const result = await providerContext?.provider.waitForTransaction(
+          multiCall.transaction_hash,
+        );
         console.log("Result", result);
         if (result && result.events.length > 0) {
           const contractAddress = result.events[0].keys[3];
@@ -136,7 +133,6 @@ export function BizForm() {
   };
 
   const getBizOwnerContract = async () => {
-
     if (!userContext?.address) {
       alert("Please connect your wallet first!");
       return;
@@ -148,23 +144,29 @@ export function BizForm() {
       return;
     }
 
-    const mycontract = new Contract(abi, factoryAddress, providerContext?.provider);
+    const mycontract = new Contract(
+      abi,
+      factoryAddress,
+      providerContext?.provider,
+    );
 
     const me = await mycontract.getUserStrapexAccount(userContext?.address);
     const stringAddress = num.toHex(me);
     alert(`Your Strapex contract address is: ${stringAddress}`);
   };
 
-
   const testingStarknetJs = async () => {
-
     const factoryAddress = FACTORY_ADDRESSES[providerContext?.network || ""];
     if (!factoryAddress) {
       alert("Factory contact missing in env");
       return;
     }
 
-    const myTestContract = new Contract(abi, factoryAddress, providerContext?.provider);
+    const myTestContract = new Contract(
+      abi,
+      factoryAddress,
+      providerContext?.provider,
+    );
     const result = myTestContract.test();
     console.log(result);
   };
@@ -172,7 +174,7 @@ export function BizForm() {
   const aproveAndDepositToContract = async () => {
     console.log("Approve and deposit to contract");
     const address = userContext?.contractAddress;
-    
+
     const eth_address =
       "0x049D36570D4e46f48e99674bd3fcc84644DdD6b96F7C741B1562B82f9e004dC7";
 
@@ -185,10 +187,10 @@ export function BizForm() {
       alert("Please create a business account first!");
       return;
     }
-    console.log(`Initiating number`)
-    let amount = 0.0001;
-    let wei = BigInt(Math.round(amount * 1e18));
-    let id: BigNumberish = 1;
+    console.log(`Initiating number`);
+    const amount = 0.0001;
+    const wei = BigInt(Math.round(amount * 1e18));
+    const id: BigNumberish = 1;
     const transactions = [
       // Calling the first contract
       {
@@ -224,13 +226,11 @@ export function BizForm() {
     }
   };
 
-  
-
   return (
-    <div className="max-w-xl mx-auto my-10 p-6 border border-gray-200 rounded-lg dark:border-gray-800">
-      <h1 className="text-2xl font-bold mb-6">Create a business account</h1>
+    <div className="mx-auto my-10 max-w-xl rounded-lg border border-gray-200 p-6 dark:border-gray-800">
+      <h1 className="mb-6 text-2xl font-bold">Create a business account</h1>
       <form onSubmit={handleSubmit}>
-        <div className="flex flex-col space-y-4 mb-4">
+        <div className="mb-4 flex flex-col space-y-4">
           <label className="font-medium" htmlFor="name">
             Name
           </label>
@@ -243,7 +243,7 @@ export function BizForm() {
             disabled={isLoading}
           />
         </div>
-        <div className="flex flex-col space-y-4 mb-4">
+        <div className="mb-4 flex flex-col space-y-4">
           <label className="font-medium" htmlFor="description">
             Description
           </label>
@@ -256,7 +256,7 @@ export function BizForm() {
             disabled={isLoading}
           />
         </div>
-        <div className="flex flex-col space-y-4 mb-6">
+        <div className="mb-6 flex flex-col space-y-4">
           <label className="font-medium" htmlFor="tags">
             Tags
           </label>
@@ -269,10 +269,8 @@ export function BizForm() {
             disabled={isLoading}
           />
         </div>
-        <Button
-          className="w-full"
-          disabled={isLoading}
-        >Create Account
+        <Button className="w-full" disabled={isLoading}>
+          Create Account
         </Button>
       </form>
       {/*

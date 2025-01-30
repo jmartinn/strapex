@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 py-4 px-6 bg-main w-full text-white">
-      <div className="flex justify-between items-center">
+    <footer className="bg-main fixed inset-x-0 bottom-0 w-full px-6 py-4 text-white">
+      <div className="flex items-center justify-between">
         <div className="text-xl font-bold">Strapex</div>
         <div className="flex flex-row items-center">
           <div className="mr-4">© 2024 Strapex</div>
@@ -10,5 +10,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
