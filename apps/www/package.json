@@ -1,13 +1,16 @@
 {
-  "name": "@strapex/frontend",
+  "name": "@strapex/www",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3333",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3333",
     "lint": "next lint",
-    "lint:fix": "eslint --fix \"**/*.{ts,tsx}\""
+    "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit",
+    "format:write": "prettier --write \"**/*.{ts,tsx}\" --cache",
+    "format:check": "prettier --check \"**/*.{ts,tsx}\" --cache"
   },
   "dependencies": {
     "@avnu/avnu-sdk": "^2.0.0",

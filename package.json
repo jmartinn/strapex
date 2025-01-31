@@ -19,8 +19,18 @@
   "scripts": {
     "build": "turbo run build",
     "clean": "turbo run clean",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --parallel",
+    "backend:dev": "turbo --filter=@strapex/api dev",
+    "backend:start": "pnpm --filter=@strapex/api start:dev",
+    "backend:build": "pnpm --filter=@strapex/api build",
+    "www:dev": "pnpm --filter=@strapex/www dev",
+    "www:build": "pnpm --filter=@strapex/www build",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "format:write": "turbo run format:write",
+    "format:check": "turbo run format:check",
+    "check": "turbo lint typecheck format:check",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
