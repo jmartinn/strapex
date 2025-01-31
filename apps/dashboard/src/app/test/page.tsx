@@ -1,8 +1,7 @@
-
 export default function Home() {
   return (
-    <div className='min-h-screen flex flex-col justify-between items-center bg-main-light'>
+    <div className="bg-main-light flex min-h-screen flex-col items-center justify-between">
       TRetsgs
     </div>
-  )
+  );
 }

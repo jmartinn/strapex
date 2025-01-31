@@ -1,16 +1,22 @@
 import { BSON } from "realm-web";
-import { BizWallet, BizWalletWithBalance } from "@/types";
+
 import { fetchTokenBalances } from "./tokenService";
 import { app } from "../../realmconfig";
 
 import { ProviderContextType } from "@/contexts/ProviderContext";
-export const getDatabaseName = (providerContext: ProviderContextType | null) => {
+import { BizWallet, BizWalletWithBalance } from "@/types";
+export const getDatabaseName = (
+  providerContext: ProviderContextType | null,
+) => {
   return providerContext?.network === "mainnet"
     ? process.env.NEXT_PUBLIC_MONGO_DB_NAME_MAINNET
     : process.env.NEXT_PUBLIC_MONGO_DB_NAME_TESTNET;
 };
 
-const saveBusinessData = async (businessData: BizWallet, providerContext: ProviderContextType | null) => {
+const saveBusinessData = async (
+  businessData: BizWallet,
+  providerContext: ProviderContextType | null,
+) => {
   try {
     if (!app.currentUser) {
       throw new Error("User not logged in");
@@ -24,11 +30,11 @@ const saveBusinessData = async (businessData: BizWallet, providerContext: Provid
 
     // Add userId to the businessData object
     const userId = app.currentUser.id;
-    const businessDataWithUserId = { ...businessData, "owner_id": userId };
+    const businessDataWithUserId = { ...businessData, owner_id: userId };
 
     console.log("Saving business data:", businessDataWithUserId);
 
-    await businesses.insertOne(businessDataWithUserId)
+    await businesses.insertOne(businessDataWithUserId);
 
     console.log("Business data saved successfully");
   } catch (error) {
@@ -37,7 +43,10 @@ const saveBusinessData = async (businessData: BizWallet, providerContext: Provid
   }
 };
 
-const getBusinessAccountsByOwner = async (walletAddress: string, providerContext: ProviderContextType | null): Promise<BizWallet[]> => {
+const getBusinessAccountsByOwner = async (
+  walletAddress: string,
+  providerContext: ProviderContextType | null,
+): Promise<BizWallet[]> => {
   try {
     if (!app.currentUser) {
       throw new Error("User not logged in");
@@ -58,7 +67,10 @@ const getBusinessAccountsByOwner = async (walletAddress: string, providerContext
   }
 };
 
-const getBusinessAccountById = async (contractAddress: string, providerContext: ProviderContextType): Promise<BizWalletWithBalance | null> => {
+const getBusinessAccountById = async (
+  contractAddress: string,
+  providerContext: ProviderContextType,
+): Promise<BizWalletWithBalance | null> => {
   try {
     if (!app.currentUser) {
       throw new Error("User not logged in");
@@ -73,7 +85,10 @@ const getBusinessAccountById = async (contractAddress: string, providerContext: 
     console.log("Contract address:", contractAddress);
     console.log("Business account found:", businessDoc);
     if (businessDoc) {
-      const balances = await fetchTokenBalances(businessDoc.contractAddress, providerContext.provider);
+      const balances = await fetchTokenBalances(
+        businessDoc.contractAddress,
+        providerContext.provider,
+      );
       console.log("Balances fetched:", balances);
       return { ...businessDoc, balances };
     } else {
@@ -85,7 +100,10 @@ const getBusinessAccountById = async (contractAddress: string, providerContext: 
   }
 };
 
-const getSubscriptionsByProductIds = async (productIds: string[], providerContext: ProviderContextType | null) => {
+const getSubscriptionsByProductIds = async (
+  productIds: string[],
+  providerContext: ProviderContextType | null,
+) => {
   try {
     if (!app.currentUser) {
       throw new Error("User not logged in");
@@ -105,5 +123,9 @@ const getSubscriptionsByProductIds = async (productIds: string[], providerContex
     throw error;
   }
 };
-export { saveBusinessData, getBusinessAccountsByOwner, getBusinessAccountById, getSubscriptionsByProductIds };
-
+export {
+  saveBusinessData,
+  getBusinessAccountsByOwner,
+  getBusinessAccountById,
+  getSubscriptionsByProductIds,
+};

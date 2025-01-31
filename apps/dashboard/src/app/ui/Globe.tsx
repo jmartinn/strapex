@@ -1,12 +1,12 @@
 "use client";
-import { useEffect } from 'react';
 import createGlobe from "cobe";
+import { useEffect } from "react";
 
 export default function Globe() {
   let phi = 0;
 
   useEffect(() => {
-    let canvas = document.getElementById("cobe") as HTMLCanvasElement;
+    const canvas = document.getElementById("cobe") as HTMLCanvasElement;
     if (canvas) {
       const globe = createGlobe(canvas, {
         devicePixelRatio: 2,

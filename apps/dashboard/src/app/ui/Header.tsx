@@ -1,29 +1,31 @@
-
-import { ChevronDownIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import {
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+  PersonIcon,
+} from "@radix-ui/react-icons";
 import { TextField, Button } from "@radix-ui/themes";
+
 import ConnectWalletBtn from "./ConnectWalletBtn";
 
 export default function Header() {
   const navLinks = [
-    
     { name: "Home", href: "#" },
     { name: "About", href: "#" },
     { name: "Hire", href: "#" },
     { name: "Contact", href: "#" },
-    
   ];
 
   return (
-    <header className="flex justify-between items-center py-4 px-6 w-full">
+    <header className="flex w-full items-center justify-between px-6 py-4">
       {/* Left side */}
       <div className="flex items-center">
         {/* Logo */}
         <a href="/">
-          <div className="text-3xl text-main font-bold flex items-center">
+          <div className="text-main flex items-center text-3xl font-bold">
             <img
               src="/StrapexBlackLogo.png"
               alt="Logo"
-              className="inline-block w-24 mr-2"
+              className="mr-2 inline-block w-24"
             />
           </div>
         </a>
@@ -40,7 +42,7 @@ export default function Header() {
         ))}
           */}
       </div>
-    
+
       {/* Right side */}
       <ConnectWalletBtn />
     </header>

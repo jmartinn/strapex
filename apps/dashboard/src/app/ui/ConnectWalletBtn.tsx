@@ -1,17 +1,14 @@
 "use client";
 import { PersonIcon, CaretDownIcon } from "@radix-ui/react-icons";
 import { Button, DropdownMenu, Switch } from "@radix-ui/themes";
+import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { Account } from "starknet";
-import {
-  StarknetWindowObject,
-  connect,
-  disconnect,
-} from "starknetkit";
-import { UserMode, useUser } from "@/contexts/UserContext";
+import { StarknetWindowObject, connect, disconnect } from "starknetkit";
+
 import { useProvider } from "@/contexts/ProviderContext";
+import { UserMode, useUser } from "@/contexts/UserContext";
 import { getRoute } from "@/utils/getRoute";
-import { usePathname } from "next/navigation";
 
 export default function ConnectWalletBtn() {
   const userContext = useUser();
@@ -42,9 +39,7 @@ export default function ConnectWalletBtn() {
 
         <DropdownMenu.Item onClick={userContext?.toggleMode}>
           Switch to{" "}
-          {userContext?.userMode === UserMode.OWNER
-            ? "freelancer"
-            : "client"}
+          {userContext?.userMode === UserMode.OWNER ? "freelancer" : "client"}
         </DropdownMenu.Item>
 
         <DropdownMenu.Separator />
@@ -70,7 +65,7 @@ export default function ConnectWalletBtn() {
   ) : (
     <Button
       onClick={userContext?.login}
-      className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+      className="rounded bg-orange-500 px-4 py-2 font-bold text-white hover:bg-orange-700"
     >
       <PersonIcon />
       Sign In

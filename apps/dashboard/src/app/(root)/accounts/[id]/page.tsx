@@ -1,21 +1,22 @@
 "use client";
-import { BizWalletWithBalance } from '@/types';
-import { useEffect, useState, useRef } from 'react';
-import { getBusinessAccountById } from "@/services/databaseService";
-import { tokenImages } from '@/lib/tokenAssets';
+import { Button } from "@radix-ui/themes";
+import { poseidonSmall, poseidonHashMany } from "@scure/starknet";
 import { Reorder } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 import { useTransition, animated } from "react-spring";
 import * as Realm from "realm-web";
-import { useUser } from '@/contexts/UserContext';
-import { CallData, EntryPointType, Uint256, uint256} from 'starknet';
-import { Button } from '@radix-ui/themes';
-import { poseidonSmall,poseidonHashMany} from '@scure/starknet';
-import { hashCall } from '@/utils/helpers';
-import { useProvider } from '@/contexts/ProviderContext';
+import { CallData, EntryPointType, Uint256, uint256 } from "starknet";
+
+import { useProvider } from "@/contexts/ProviderContext";
+import { useUser } from "@/contexts/UserContext";
+import { tokenImages } from "@/lib/tokenAssets";
+import { getBusinessAccountById } from "@/services/databaseService";
+import { BizWalletWithBalance } from "@/types";
+import { hashCall } from "@/utils/helpers";
 const app = new Realm.App({ id: "application-0-skavior" });
 
 interface ProfileTestPageProps {
-  params: { id: string; };
+  params: { id: string };
 }
 
 export default function ProfileTestPage({ params }: ProfileTestPageProps) {
@@ -29,8 +30,11 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Provider context network", providerContext?.network)
-        const account = await getBusinessAccountById(contractAddress, providerContext);
+        console.log("Provider context network", providerContext?.network);
+        const account = await getBusinessAccountById(
+          contractAddress,
+          providerContext,
+        );
         if (account) {
           setBizWallet(account);
         }
@@ -56,7 +60,7 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
 
       const transactions = await collection.find(
         {},
-        { sort: { blockNumber: -1 } }
+        { sort: { blockNumber: -1 } },
       );
       console.log("transactions", transactions);
       setTransactions(transactions);
@@ -65,7 +69,10 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
         if (change.operationType === "insert") {
           const newTransaction = change.fullDocument;
           console.log("New transaction", newTransaction);
-          setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
+          setTransactions((prevTransactions) => [
+            newTransaction,
+            ...prevTransactions,
+          ]);
         }
       }
     };
@@ -84,16 +91,13 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
     return <div>Loading...</div>;
   }
 
-
   const withdrawAll = async () => {
-
     if (!userContext?.address) {
       alert("Please connect your wallet first!");
       return;
     }
 
     const transactions = [
-
       {
         contractAddress: bizWallet.contractAddress,
         entrypoint: "withdraw",
@@ -102,7 +106,7 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
       },
     ];
 
-    userContext?.account?.getStarkName
+    userContext?.account?.getStarkName;
     console.log(`Transactions: ${transactions}`);
     if (userContext?.account) {
       const multiCall = await userContext?.account.execute(transactions);
@@ -115,11 +119,9 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
     }
   };
 
-
-
   const claimSubscription = async () => {
-
-    const addressOfCostumer = "0x00d099386d761150881b5de9420fabf04af507f9e7d37af34a635baea9bb4f4a"
+    const addressOfCostumer =
+      "0x00d099386d761150881b5de9420fabf04af507f9e7d37af34a635baea9bb4f4a";
 
     const unixTimestamp = Math.floor(Date.now() / 1000);
     const unixTimestampPlus10Minutes = unixTimestamp + 600;
@@ -127,12 +129,11 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
 
     const amount: Uint256 = uint256.bnToUint256(BigInt(0.001 * 1e18));
 
-
     if (!userContext?.address) {
       alert("Please connect your wallet first!");
       return;
     }
-    
+
     const transferCall = {
       contractAddress: bizWallet.contractAddress,
       entrypoint: "deposit",
@@ -144,9 +145,11 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
 
     console.log(`Transfer Call: ${JSON.stringify(transferCall)}`);
 
-    const contractAddress = BigInt("0x049D36570D4e46f48e99674bd3fcc84644DdD6b96F7C741B1562B82f9e004dC7")
+    const contractAddress = BigInt(
+      "0x049D36570D4e46f48e99674bd3fcc84644DdD6b96F7C741B1562B82f9e004dC7",
+    );
 
-    //const hash = hashCall(transferCall);  
+    //const hash = hashCall(transferCall);
     // dconsole.log(`Signature: ${hash.toString(16)}`)
 
     const transactions = [
@@ -159,15 +162,11 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
           nonce: 1,
           execute_after: unixTimestampMinus10Minutes,
           execute_before: unixTimestampPlus10Minutes,
-          calls: [
-            transferCall
-          ],
+          calls: [transferCall],
           signature: [],
         }),
       },
     ];
-
-    
 
     console.log(`Transactions: ${JSON.stringify(transactions)}`);
 
@@ -180,78 +179,88 @@ export default function ProfileTestPage({ params }: ProfileTestPageProps) {
         alert(`Transaction hash: ${hx}`);
       }
     }
-  }
+  };
 
-
-    return (
-      <div className="bg-white text-gray-800 font-sans py-4 px-6">
-        <h1 className="text-2xl font-bold mb-4">Profile Test Page</h1>
-        <p className="mb-2">Contract Address: <span className="font-semibold">{contractAddress}</span></p>
-        <Button onClick={withdrawAll}>Withdraw</Button>
-        <Button onClick={claimSubscription}>Claim Subscription</Button>
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Token Balances</h2>
-          {bizWallet.balances.map((balance, index) => (
-            <p key={index} className="mb-1">{balance.ticker}: <span className="font-medium">{balance.balance}</span></p>
-          ))}
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Transactions</h2>
-          <Reorder.Group
-            axis="y"
-            values={transactions}
-            onReorder={setTransactions}
-          >
-            <table className="table-auto w-full">
-              <thead>
-                <tr>
-                  <td>Block Number</td>
-                  <td>Transaction Hash</td>
-                  <td>From</td>
-                  <td>Amount</td>
-                  <td>Token</td>
-                  <td>Deposit ID</td>
-                </tr>
-              </thead>
-
-              <Reorder.Group
-                as="tbody"
-                axis="y"
-                values={transactions}
-                onReorder={setTransactions}
-              >
-                {transactions.map((transaction, index) => (
-                  <Reorder.Item
-                    key={transaction._id}
-                    value={transaction}
-                    as="tr"
-                    initial={{ y: isItemNew(transaction._id) ? -50 : 0, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 30,
-                    }}
-                  >
-                    <td>{transaction.blockNumber}</td>
-                    <td>{`${transaction.transactionHash.slice(0, 4)}...${transaction.transactionHash.slice(-4)}`}</td>
-                    <td>{`${transaction.from.slice(0, 4)}...${transaction.from.slice(-4)}`}</td>
-                    <td>{transaction.amount / 1e18}</td>
-                    <td>
-                      <img
-                        src={tokenImages[transaction.token] || "default_image_path"}
-                        alt="Token"
-                        className="h-6 w-6"
-                      />
-                    </td>
-                    <td>{transaction.depositId}</td>
-                  </Reorder.Item>
-                ))}
-              </Reorder.Group>
-            </table>
-          </Reorder.Group>
-        </div>
+  return (
+    <div className="bg-white px-6 py-4 font-sans text-gray-800">
+      <h1 className="mb-4 text-2xl font-bold">Profile Test Page</h1>
+      <p className="mb-2">
+        Contract Address:{" "}
+        <span className="font-semibold">{contractAddress}</span>
+      </p>
+      <Button onClick={withdrawAll}>Withdraw</Button>
+      <Button onClick={claimSubscription}>Claim Subscription</Button>
+      <div>
+        <h2 className="mb-3 text-xl font-semibold">Token Balances</h2>
+        {bizWallet.balances.map((balance, index) => (
+          <p key={index} className="mb-1">
+            {balance.ticker}:{" "}
+            <span className="font-medium">{balance.balance}</span>
+          </p>
+        ))}
       </div>
-    );
-  }
+      <div>
+        <h2 className="mb-3 text-xl font-semibold">Transactions</h2>
+        <Reorder.Group
+          axis="y"
+          values={transactions}
+          onReorder={setTransactions}
+        >
+          <table className="w-full table-auto">
+            <thead>
+              <tr>
+                <td>Block Number</td>
+                <td>Transaction Hash</td>
+                <td>From</td>
+                <td>Amount</td>
+                <td>Token</td>
+                <td>Deposit ID</td>
+              </tr>
+            </thead>
+
+            <Reorder.Group
+              as="tbody"
+              axis="y"
+              values={transactions}
+              onReorder={setTransactions}
+            >
+              {transactions.map((transaction, index) => (
+                <Reorder.Item
+                  key={transaction._id}
+                  value={transaction}
+                  as="tr"
+                  initial={{
+                    y: isItemNew(transaction._id) ? -50 : 0,
+                    opacity: 0,
+                  }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                  }}
+                >
+                  <td>{transaction.blockNumber}</td>
+                  <td>{`${transaction.transactionHash.slice(0, 4)}...${transaction.transactionHash.slice(-4)}`}</td>
+                  <td>{`${transaction.from.slice(0, 4)}...${transaction.from.slice(-4)}`}</td>
+                  <td>{transaction.amount / 1e18}</td>
+                  <td>
+                    <img
+                      src={
+                        tokenImages[transaction.token] || "default_image_path"
+                      }
+                      alt="Token"
+                      className="size-6"
+                    />
+                  </td>
+                  <td>{transaction.depositId}</td>
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
+          </table>
+        </Reorder.Group>
+      </div>
+    </div>
+  );
+}
