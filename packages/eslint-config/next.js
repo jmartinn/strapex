@@ -1,13 +1,13 @@
-import js from "@eslint/js"
-import prettierRecommended from "eslint-plugin-prettier/recommended"
-import importPlugin from "eslint-plugin-import"
-import turboPlugin from "eslint-plugin-turbo"
-import tseslint from "typescript-eslint"
-import pluginReactHooks from "eslint-plugin-react-hooks"
-import tailwind from "eslint-plugin-tailwindcss"
-import pluginReact from "eslint-plugin-react"
-import globals from "globals"
-import pluginNext from "@next/eslint-plugin-next"
+import js from "@eslint/js";
+import prettierRecommended from "eslint-plugin-prettier/recommended";
+import importPlugin from "eslint-plugin-import";
+import turboPlugin from "eslint-plugin-turbo";
+import tseslint from "typescript-eslint";
+import pluginReactHooks from "eslint-plugin-react-hooks";
+import tailwind from "eslint-plugin-tailwindcss";
+import pluginReact from "eslint-plugin-react";
+import globals from "globals";
+import pluginNext from "@next/eslint-plugin-next";
 
 export default tseslint.config(
   js.configs.recommended,
@@ -25,7 +25,10 @@ export default tseslint.config(
   },
   {
     files: ["**/*.{ts,tsx}"],
-    extends: [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript],
+    extends: [
+      importPlugin.flatConfigs.recommended,
+      importPlugin.flatConfigs.typescript,
+    ],
     plugins: {
       turbo: turboPlugin,
       "@next/next": pluginNext,
@@ -37,6 +40,12 @@ export default tseslint.config(
         config: "tailwind.config.ts",
       },
       react: { version: "detect" },
+      "import/resolver": {
+        typescript: {
+          // project: ["packages/*/tsconfig.json", "apps/*/tsconfig.json"],
+          project: ["./tsconfig.json", "./packages/*/tsconfig.json"],
+        },
+      },
     },
     rules: {
       "turbo/no-undeclared-env-vars": "warn",
@@ -46,8 +55,18 @@ export default tseslint.config(
       "import/order": [
         "error",
         {
-          groups: ["builtin", "external", "internal", ["sibling", "parent"], "index", "object"],
-          pathGroups: [{ pattern: "react", group: "external", position: "before" }],
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["sibling", "parent"],
+            "index",
+            "object",
+          ],
+          pathGroups: [
+            { pattern: "react", group: "external", position: "before" },
+            { pattern: "@/**", group: "internal" },
+          ],
           "newlines-between": "always",
           alphabetize: { order: "asc", caseInsensitive: true },
         },
@@ -56,10 +75,17 @@ export default tseslint.config(
       "tailwindcss/no-custom-classname": "off",
       "react/react-in-jsx-scope": "off",
       ...pluginReactHooks.configs.recommended.rules,
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   {
     ignores: ["dist/**", "node_modules/**", ".next/**"],
   },
-)
-
+);
