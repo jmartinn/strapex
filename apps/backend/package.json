@@ -1,18 +1,32 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "@strapex/api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend service for the Strapex core project",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strapexlabs/strapex.git",
+    "directory": "apps/backend"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
+  "exports": "./dist/index.js",
   "scripts": {
     "start": "nodemon",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix \"**/*.{ts,tsx}\""
+    "lint:fix": "eslint --fix \"**/*.{ts}\"",
+    "format:write": "prettier --write \"**/*.ts\" --cache",
+    "format:check": "prettier --check \"**/*.ts\" --cache",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
+    "@strapex/eslint-config": "workspace:*",
+    "@strapex/typescript-config": "workspace:*",
     "@types/body-parser": "^1.19.5",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.7",
@@ -20,12 +34,11 @@
     "@types/express": "^4.17.21",
     "@types/mailgun-js": "^0.22.18",
     "@types/pdfkit": "^0.13.4",
-    "@strapex/typescript-config": "workspace:*",
-    "@strapex/eslint-config": "workspace:*",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "mongodb": "^6.5.0",
     "nodemon": "^2.0.20",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
   },
