@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix \"**/*.{ts}\"",
+    "lint:fix": "eslint --fix \"**/*.ts\"",
     "format:write": "prettier --write \"**/*.ts\" --cache",
     "format:check": "prettier --check \"**/*.ts\" --cache",
     "test": "echo \"Error: no test specified\" && exit 1"

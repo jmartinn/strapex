@@ -17,12 +17,9 @@ export default tseslint.config(
     settings: {
       "import/resolver": {
         typescript: {
-          project: ["./tsconfig.json"],
+          alwaysTryTypes: true,
+          project: ["./tsconfig.json", "apps/*/tsconfig.json", "packages/*/tsconfig.json"],
         },
-        node: {
-          extensions: [".js", ".ts"]
-        },
-        caseSensitive: false,
       },
     },
     rules: {
