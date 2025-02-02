@@ -67,18 +67,19 @@ When submitting a pull request:
 
 ## Development Setup
 
+> ⚠️  WARNING: The following monolithic architecture is yet to be implemented and it will be done gradually as stated in [#22](https://github.com/StrapexLabs/strapex/issues/22), for now please refer to the current project structure as is shown in the repository and ignore this section.
+
 Our project uses Turborepo with pnpm workspaces. The repository is structured as follows:
 
 ```
 apps/
-  ├── www/          # Landing page
-  ├── dashboard/    # Payment gateway interface
-  ├── backend/      # Backend services
-  └── indexer/      # Blockchain data indexer
+  ├── dashboard/        # Payment gateway interface
+  └── backend/          # Backend services
 
 packages/
-  ├── sdk/          # TypeScript SDK
-  └── contracts/    # Cairo contracts
+  ├── sdk/              # TypeScript SDK
+  ├── contracts/        # Cairo contracts
+  └── indexer/          # Blockchain data indexer
 ```
 
 ## Questions and Support
