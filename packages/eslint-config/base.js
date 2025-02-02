@@ -14,6 +14,17 @@ export default tseslint.config(
     plugins: {
       turbo: turboPlugin,
     },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: ["./tsconfig.json"],
+        },
+        node: {
+          extensions: [".js", ".ts"]
+        },
+        caseSensitive: false,
+      },
+    },
     rules: {
       "turbo/no-undeclared-env-vars": "warn",
       "import/order": [

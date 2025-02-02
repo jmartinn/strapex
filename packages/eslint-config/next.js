@@ -42,8 +42,7 @@ export default tseslint.config(
       react: { version: "detect" },
       "import/resolver": {
         typescript: {
-          // project: ["packages/*/tsconfig.json", "apps/*/tsconfig.json"],
-          project: ["./tsconfig.json", "./packages/*/tsconfig.json"],
+          project: ["./tsconfig.json"],
         },
       },
     },
