@@ -73,7 +73,7 @@ Our project uses Turborepo with pnpm workspaces. The repository is structured as
 
 ```
 apps/
-  ├── dashboard/        # Payment gateway interface
+  ├── www/              # Payment gateway interface
   └── backend/          # Backend services
 
 packages/
