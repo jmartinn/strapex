@@ -1,12 +1,21 @@
 name: "Feature Request"
 description: "Suggest an idea or improvement for the project"
-title: '[feat]: '
+title: '[scope]: '
 labels: ['area: request']
 body:
   - type: markdown
     attributes:
       value: |
-        ### Description\nA clear and concise description of the feature request.
+        ### Thanks for taking the time to create a feature request! Please search open/closed issues before submitting, as the issue may have already been reported/addressed.
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature description
+      description: Tell us about your feature request
+      placeholder: 'I think this feature would be great because...'
+      value: 'Describe your feature request...'
+    validations:
+      required: true
 
   - type: textarea
     id: current_limitations
