@@ -1,6 +1,4 @@
 use starknet::ContractAddress;
-use openzeppelin::access::ownable::interface::IOwnable;
-use openzeppelin::access::ownable::OwnableComponent;
 
 #[starknet::interface]
 trait IERC20<TContractState> {

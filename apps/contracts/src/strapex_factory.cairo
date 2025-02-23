@@ -1,6 +1,4 @@
 use starknet::{ContractAddress, ClassHash};
-use openzeppelin::access::ownable::OwnableComponent;
-use openzeppelin::access::ownable::interface::IOwnable;
 // This contract implements a factory pattern for creating and managing Strapex contracts.
 
 #[starknet::interface]
