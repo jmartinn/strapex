@@ -1,4 +1,6 @@
 use starknet::{ContractAddress, ClassHash};
+use openzeppelin::access::ownable::OwnableComponent;
+use openzeppelin::access::ownable::interface::IOwnable;
 // This contract implements a factory pattern for creating and managing Strapex contracts.
 
 #[starknet::interface]
@@ -24,8 +26,8 @@ mod StrapexFactory {
         ContractAddress, ClassHash, Zeroable, get_caller_address, contract_address_const,
     };
     use core::starknet::event::EventEmitter;
-    use openzeppelin::access::ownable::interface::IOwnable;
     use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::access::ownable::interface::IOwnable;
     use starknet::storage::Map;
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
@@ -97,7 +99,7 @@ mod StrapexFactory {
         self.totalStrapexAccountsNo.write(0);
         self.strapexChildHash.write(childHash);
         self.depositToken.write(depositToken);
-        self.ownable.transfer_ownership(owner);
+        self.ownable.initializer(owner);
     }
 
     #[abi(embed_v0)]
