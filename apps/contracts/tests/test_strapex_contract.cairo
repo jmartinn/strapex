@@ -24,11 +24,15 @@ fn TOKEN() -> ContractAddress {
 }
 
 fn OWNER() -> ContractAddress {
-    contract_address_const::<0x0590e76a2e65435b7288bf3526cfa5c3ec7748d2f3433a934c931cce62460fc5>()
+    contract_address_const::<0x1234>()
 }
 
 fn USER() -> ContractAddress {
-    contract_address_const::<0x1234>()
+    contract_address_const::<0x0590e76a2e65435b7288bf3526cfa5c3ec7748d2f3433a934c931cce62460fc5>()
+}
+
+fn USER2() -> ContractAddress {
+    contract_address_const::<0x5678>()
 }
 
 // deploys and return the contract factory dispatcher
@@ -45,27 +49,23 @@ fn deploy_only_factory() -> IStrapexFactoryDispatcher {
 }
 
 fn deploy_factory() -> (ContractAddress, ContractAddress, IStrapexDispatcher) {
-    let token: ContractAddress = 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d
-        .try_into()
-        .unwrap();
-    let user: ContractAddress = 0x0590e76a2e65435b7288bf3526cfa5c3ec7748d2f3433a934c931cce62460fc5
-        .try_into()
-        .unwrap();
-    let token_felt: felt252 = token.into();
-    let user_felt: felt252 = user.into();
+    // declare variables
+    let token_felt: felt252 = TOKEN().into();
+    let factory_owner_felt: felt252 = OWNER().into();
 
+    // deploy strapex factory
     let factory_class_hash = declare("StrapexFactory").unwrap().contract_class();
     let child_class_hash = declare("StrapexContract").unwrap().contract_class().class_hash;
     let child_hash_felt: felt252 = class_hash_to_felt252(*child_class_hash);
-    let constructor_data: Array<felt252> = array![user_felt, child_hash_felt, token_felt];
+    let constructor_data: Array<felt252> = array![factory_owner_felt, child_hash_felt, token_felt];
     let (factory_addr, _) = factory_class_hash.deploy(@constructor_data).unwrap();
     let factory_disp = IStrapexFactoryDispatcher { contract_address: factory_addr };
 
+    // deploy strapex
+    let user = USER();
     start_cheat_caller_address(factory_addr, user);
-
     let child_addr = factory_disp.create_strapex_contract();
     let child_disp = IStrapexDispatcher { contract_address: child_addr };
-
     (child_addr, user, child_disp)
 }
 
@@ -217,13 +217,13 @@ fn test_withdraw_amount_unauthorized() {
 
 
 /////////////////////
-// STRAPEX OWNERSHIP
+// TEST STRAPEX OWNERSHIP
 /////////////////////
 #[test]
 fn test_strapex_set_correct_ownership_at_deploy() {
     let (_,_,strapex_disp) = deploy_factory();
     let owner = strapex_disp.get_owner();
-    assert!(owner==OWNER(), "Not correct owner");
+    assert!(owner==USER(), "Not correct owner");
 }
 
 #[test]
@@ -236,10 +236,10 @@ fn test_strapex_constructor_fails_when_send_zero_address_as_owner() {
     let child_class_hash = declare("StrapexContract").unwrap().contract_class().class_hash;
     let child_hash_felt: felt252 = class_hash_to_felt252(*child_class_hash);
     let constructor_data: Array<felt252> = array![owner_felt, child_hash_felt, token_felt];
-    // deploy should fail
     let (factory_addr, _) = factory_class_hash.deploy(@constructor_data).unwrap();
     let factory_disp = IStrapexFactoryDispatcher { contract_address: factory_addr };
-
+    
+    // create strapex should fail
     start_cheat_caller_address(factory_addr, contract_address_const::<0x0>());
     factory_disp.create_strapex_contract();
 }
@@ -249,14 +249,14 @@ fn test_strapex_owner_transfer_ownership() {
     let (_,_,strapex_disp) = deploy_factory();
 
     let previous_owner = strapex_disp.get_owner();
-    start_cheat_caller_address(strapex_disp.contract_address, OWNER());
-    strapex_disp._transfer_ownership(USER());
+    start_cheat_caller_address(strapex_disp.contract_address, USER());
+    strapex_disp._transfer_ownership(USER2());
     stop_cheat_caller_address(strapex_disp.contract_address);
     let new_owner = strapex_disp.get_owner();
     
     // asserts
-    assert!(previous_owner == OWNER(), "Prev owner is not OWNER");
-    assert!(new_owner == USER(), "New owner is not USER");
+    assert!(previous_owner == USER(), "Prev owner is not USER");
+    assert!(new_owner == USER2(), "New owner is not USER1");
 }
 
 #[test]
@@ -265,8 +265,8 @@ fn test_strapex_non_owner_tries_to_transfer_ownership() {
     let (_,_,strapex_disp) = deploy_factory();
     
     // call from a non-owner account
-    start_cheat_caller_address(strapex_disp.contract_address, USER());
-    strapex_disp._transfer_ownership(USER());
+    start_cheat_caller_address(strapex_disp.contract_address, USER2());
+    strapex_disp._transfer_ownership(USER2());
     stop_cheat_caller_address(strapex_disp.contract_address);
 }
 
@@ -275,14 +275,14 @@ fn test_strapex_owner_renounce_ownership() {
     let (_,_,strapex_disp) = deploy_factory();
 
     let previous_owner = strapex_disp.get_owner();
-    start_cheat_caller_address(strapex_disp.contract_address, OWNER());
+    start_cheat_caller_address(strapex_disp.contract_address, USER());
     strapex_disp._renounce_ownership();
     stop_cheat_caller_address(strapex_disp.contract_address);
     let new_owner = strapex_disp.get_owner();
     
     // asserts
-    assert!(previous_owner == OWNER(), "Prev owner is not OWNER");
-    assert!(new_owner == contract_address_const::<0x0>(), "New owner is not USER");
+    assert!(previous_owner == USER(), "Prev owner is not OWNER");
+    assert!(new_owner == contract_address_const::<0x0>(), "New owner should be zero address");
 }
 
 #[test]
@@ -291,7 +291,7 @@ fn test_strapex_non_owner_tries_to_renounce_ownership() {
     let (_,_,strapex_disp) = deploy_factory();
     
     // call from a non-owner account
-    start_cheat_caller_address(strapex_disp.contract_address, USER());
+    start_cheat_caller_address(strapex_disp.contract_address, USER2());
     strapex_disp._renounce_ownership();
     stop_cheat_caller_address(strapex_disp.contract_address);
 }
