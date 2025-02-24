@@ -27,6 +27,9 @@ trait IStrapex<TContractState> {
     fn get_manager(self: @TContractState) -> ContractAddress;
     fn refund(ref self: TContractState, tx_hash: felt252);
     fn refund_amount(ref self: TContractState, tx_hash: felt252, amount: u256);
+    fn get_owner(self: @TContractState) -> ContractAddress;
+    fn _transfer_ownership(ref self: TContractState, newOwner:ContractAddress);
+    fn _renounce_ownership(ref self: TContractState);
 }
 
 #[starknet::contract]
@@ -318,6 +321,18 @@ pub mod StrapexContract {
 
         fn get_manager(self: @ContractState) -> ContractAddress {
             self.manager.read()
+        }
+
+        fn get_owner(self: @ContractState) -> ContractAddress {
+            self.ownable.owner()
+        }
+
+        fn _transfer_ownership(ref self: ContractState, newOwner:ContractAddress) {
+            self.ownable.transfer_ownership(newOwner);
+        }
+
+        fn _renounce_ownership(ref self: ContractState) {
+            self.ownable.renounce_ownership();
         }
     }
 
