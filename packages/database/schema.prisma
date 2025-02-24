@@ -1,0 +1,105 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BizWallet {
+  id                String     @id @default(uuid())
+  name              String
+  description       String?
+  tags              String?
+  apiKey            String     @unique
+  contractAddress   String     @unique
+  ownerAddress      String     @unique
+  createdAt         DateTime   @default(now())
+
+  balances          Balance[]
+  products          Product[]
+  transactions      Transaction[]
+
+  @@map("biz_wallets")
+}
+
+model Balance {
+  id            String   @id @default(uuid())
+  bizWalletId   String
+  image         String
+  ticker        String
+  address       String
+  balanceSelector String
+  balance       Float
+
+  bizWallet     BizWallet @relation(fields: [bizWalletId], references: [id])
+
+  @@map("balances")
+}
+
+model Product {
+  id            String    @id @default(uuid())
+  paymentType   PaymentType
+  name          String
+  price         Float
+  token         String
+  address       String
+  createdAt     DateTime  @default(now())
+  owner         String
+
+  bizWallet     BizWallet @relation(fields: [owner], references: [ownerAddress])
+
+  @@map("products")
+}
+
+model Session {
+  id                  String    @id @default(uuid())
+  sessionId           String    @unique
+  totalPrice          Float
+  totalPriceToken     String
+  paymentType         PaymentType
+  successUrl          String
+  cancelUrl           String
+  depositAddress      String
+  status              String
+  billingAddressCollection String?
+  shippingAddressCollection String?
+
+  lineItems           LineItem[]
+
+  @@map("sessions")
+}
+
+model LineItem {
+  id            String   @id @default(uuid())
+  sessionId     String
+  name          String
+  price         Float
+  currency      String
+  quantity      Int
+
+  session       Session @relation(fields: [sessionId], references: [id])
+
+  @@map("line_items")
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  bizWalletId   String
+  blockNumber   Int
+  transactionHash String
+  fromAddress   String
+  amount        Float
+  token         String
+  depositId     String
+
+  bizWallet     BizWallet @relation(fields: [bizWalletId], references: [id])
+
+  @@map("transactions")
+}
+
+enum PaymentType {
+  onetime
+}
