@@ -51,6 +51,7 @@ export default tseslint.config(
       ...pluginNext.configs.recommended.rules,
       ...pluginNext.configs["core-web-vitals"].rules,
       "@next/next/no-html-link-for-pages": "off",
+      "@typescript-eslint/no-require-imports": "off",
       "import/order": [
         "error",
         {
