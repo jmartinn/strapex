@@ -10,6 +10,8 @@ trait IStrapexFactory<TContractState> {
         self: @TContractState, userAddress: ContractAddress,
     ) -> ContractAddress;
     fn get_owner(self: @TContractState) -> ContractAddress;
+    fn _transfer_ownership(ref self: TContractState, newOwner: ContractAddress);
+    fn _renounce_ownership(ref self: TContractState);
     fn get_childClassHash(self: @TContractState) -> ClassHash;
 }
 
@@ -20,14 +22,14 @@ mod StrapexFactory {
     use starknet::deploy_syscall;
     use starknet::{ContractAddress, ClassHash, Zeroable, get_caller_address};
     use core::starknet::event::EventEmitter;
-    use contract_strapex::ownership_component::IOwnable;
-    use contract_strapex::ownership_component::ownable_component;
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::access::ownable::interface::IOwnable;
     use starknet::storage::Map;
+    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
-    component!(path: ownable_component, storage: ownable, event: OwnableEvent);
     #[abi(embed_v0)]
-    impl OwnableImpl = ownable_component::Ownable<ContractState>;
-    impl OwnableInternalImpl = ownable_component::InternalImpl<ContractState>;
+    impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
+    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
 
     #[storage]
     struct Storage {
@@ -36,13 +38,13 @@ mod StrapexFactory {
         totalStrapexAccountsNo: u128,
         depositToken: ContractAddress,
         #[substorage(v0)]
-        ownable: ownable_component::Storage,
+        ownable: OwnableComponent::Storage,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        OwnableEvent: ownable_component::Event,
+        OwnableEvent: OwnableComponent::Event,
         HashUpdated: HashUpdated,
         AccountCreated: AccountCreated,
         DepositTokenUpdated: DepositTokenUpdated,
@@ -100,7 +102,7 @@ mod StrapexFactory {
         self.totalStrapexAccountsNo.write(0);
         self.strapexChildHash.write(childHash);
         self.depositToken.write(depositToken);
-        self.ownable.owner.write(owner);
+        self.ownable.initializer(owner);
     }
 
     #[abi(embed_v0)]
@@ -108,7 +110,7 @@ mod StrapexFactory {
         fn create_strapex_contract(ref self: ContractState) -> ContractAddress {
             let token_addr: ContractAddress = self.depositToken.read();
             let mut constructor_calldata = ArrayTrait::new();
-            self.ownable.owner.read().serialize(ref constructor_calldata);
+            self.ownable.owner().serialize(ref constructor_calldata);
             get_caller_address().serialize(ref constructor_calldata);
             token_addr.serialize(ref constructor_calldata);
 
@@ -171,6 +173,14 @@ mod StrapexFactory {
 
         fn get_owner(self: @ContractState) -> ContractAddress {
             self.ownable.owner()
+        }
+
+        fn _transfer_ownership(ref self: ContractState, newOwner: ContractAddress) {
+            self.ownable.transfer_ownership(newOwner);
+        }
+
+        fn _renounce_ownership(ref self: ContractState) {
+            self.ownable.renounce_ownership();
         }
 
         fn get_childClassHash(self: @ContractState) -> ClassHash {
