@@ -1,3 +1,5 @@
+use snforge_std::EventsFilterTrait;
+use snforge_std::EventSpyTrait;
 use starknet::{ClassHash, ContractAddress, contract_address_const, get_caller_address};
 
 use snforge_std::{
@@ -216,9 +218,9 @@ fn test_withdraw_amount_unauthorized() {
 }
 
 
-/////////////////////
+///////////////////
 // TEST STRAPEX OWNERSHIP
-/////////////////////
+///////////////////
 #[test]
 fn test_strapex_set_correct_ownership_at_deploy() {
     let (_,_,strapex_disp) = deploy_factory();
@@ -246,8 +248,10 @@ fn test_strapex_constructor_fails_when_send_zero_address_as_owner() {
 
 #[test]
 fn test_strapex_owner_transfer_ownership() {
+    let mut spy = spy_events();
+    
     let (_,_,strapex_disp) = deploy_factory();
-
+    
     let previous_owner = strapex_disp.get_owner();
     start_cheat_caller_address(strapex_disp.contract_address, USER());
     strapex_disp._transfer_ownership(USER2());
@@ -257,6 +261,12 @@ fn test_strapex_owner_transfer_ownership() {
     // asserts
     assert!(previous_owner == USER(), "Prev owner is not USER");
     assert!(new_owner == USER2(), "New owner is not USER1");
+    
+    let events = spy.get_events().emitted_by(strapex_disp.contract_address);
+    let (_, event) = events.events.at(0);
+
+    assert_eq!(event.keys.at(0), @selector!("OwnableEvent"), "OwnableEvent wasn't emmited");
+    assert_eq!(event.keys.at(1), @selector!("OwnershipTransferred"), "OwnershipTransferred event wasn't emmited");
 }
 
 #[test]
@@ -324,8 +334,10 @@ fn test_strapex_factory_constructor_fails_when_send_zero_address_as_owner() {
 
 #[test]
 fn test_strapex_factory_owner_transfer_ownership() {
-    let factory_disp = deploy_only_factory();
+    let mut spy = spy_events(); 
 
+    let factory_disp = deploy_only_factory();
+    
     let previous_owner = factory_disp.get_owner();
     start_cheat_caller_address(factory_disp.contract_address, OWNER());
     factory_disp._transfer_ownership(USER());
@@ -335,6 +347,12 @@ fn test_strapex_factory_owner_transfer_ownership() {
     // asserts
     assert!(previous_owner == OWNER(), "Prev owner is not OWNER");
     assert!(new_owner == USER(), "New owner is not USER");
+    
+    let events = spy.get_events().emitted_by(factory_disp.contract_address);
+    let (_, event) = events.events.at(0);
+    
+    assert_eq!(event.keys.at(0), @selector!("OwnableEvent"), "OwnableEvent wasn't emmited");
+    assert_eq!(event.keys.at(1), @selector!("OwnershipTransferred"), "OwnershipTransferred event wasn't emmited");
 }
 
 #[test]
