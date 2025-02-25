@@ -10,7 +10,7 @@ trait IStrapexFactory<TContractState> {
         self: @TContractState, userAddress: ContractAddress,
     ) -> ContractAddress;
     fn get_owner(self: @TContractState) -> ContractAddress;
-    fn _transfer_ownership(ref self: TContractState, newOwner:ContractAddress);
+    fn _transfer_ownership(ref self: TContractState, newOwner: ContractAddress);
     fn _renounce_ownership(ref self: TContractState);
     fn get_childClassHash(self: @TContractState) -> ClassHash;
 }
@@ -175,7 +175,7 @@ mod StrapexFactory {
             self.ownable.owner()
         }
 
-        fn _transfer_ownership(ref self: ContractState, newOwner:ContractAddress) {
+        fn _transfer_ownership(ref self: ContractState, newOwner: ContractAddress) {
             self.ownable.transfer_ownership(newOwner);
         }
 
