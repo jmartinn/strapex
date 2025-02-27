@@ -7,19 +7,32 @@ Thank you for your interest in contributing to Strapex! We aim to make blockchai
 1. **Fork the repository** by clicking the [Fork](https://github.com/strapexlabs/strapex/fork) button.
 
 2. **Clone your fork**:
+
    ```bash
    git clone https://github.com/your-username/strapex.git
    cd strapex
    ```
 
 3. **Install dependencies**:
+
    ```bash
    pnpm install
+   ```
+
+4. **Update to latest starknet & cairo version**
+   To update scarb/starknet, run
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v 2.9.4
+   ```
+   To update snfoundry, run
+   ```bash
+   snfoundryup -v 0.37.0
    ```
 
 ## Development Workflow
 
 1. **Create a new branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -27,11 +40,13 @@ Thank you for your interest in contributing to Strapex! We aim to make blockchai
 2. **Make your changes** following our coding standards and practices.
 
 3. **Commit your changes** using conventional commit messages:
+
    ```bash
    git commit -m "type: description"
    ```
-   
+
    Common types include:
+
    - `feat`: New features
    - `fix`: Bug fixes
    - `docs`: Documentation changes
@@ -42,6 +57,7 @@ Thank you for your interest in contributing to Strapex! We aim to make blockchai
    - `chore`: Maintenance tasks
 
 4. **Push your changes**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -51,6 +67,7 @@ Thank you for your interest in contributing to Strapex! We aim to make blockchai
 ## Pull Request Guidelines
 
 When submitting a pull request:
+
 - Provide a clear description of the changes
 - Include the purpose of your changes and any relevant issue numbers
 - Ensure all tests pass
@@ -85,19 +102,21 @@ packages/
 ## Questions and Support
 
 If you have questions or need help:
+
 - Open an issue for feature requests or bug reports
 - Join our Telegram community [https://t.me/strapexlabs]
 - Check our documentation [Documentation](README)
 
 ## Security
 
-For security concerns, please contact any of the project maintainers via their GitHub profiles  instead of opening an issue.
+For security concerns, please contact any of the project maintainers via their GitHub profiles instead of opening an issue.
 
 ## License
 
 By contributing to Strapex, you agree that your contributions will be licensed under our project [license](LICENSE).
 
 ## Contributors
+
 <a href="https://github.com/StrapexLabs/strapex/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=StrapexLabs/strapex" />
 </a>
