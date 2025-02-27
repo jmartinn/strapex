@@ -19,16 +19,6 @@ Thank you for your interest in contributing to Strapex! We aim to make blockchai
    pnpm install
    ```
 
-4. **Update to latest starknet & cairo version**
-   To update scarb/starknet, run
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v 2.10.1
-   ```
-   To update snfoundry, run
-   ```bash
-   snfoundryup -v 0.37.0
-   ```
-
 ## Development Workflow
 
 1. **Create a new branch**:
