@@ -40,6 +40,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { WalletConnect } from "../wallet-connect";
+
 const formSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2, {
@@ -54,13 +56,12 @@ const formSchema = z.object({
   }),
   phone: z.string(),
   shippingMethod: z.enum(["free", "next"]),
-  wallet: z.enum(["metamask", "walletconnect", "coinbase", "phantom"]),
   saveInfo: z.boolean().default(false),
 });
 
 export function CheckoutForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [isWalletConnected, _setIsWalletConnected] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,7 +74,6 @@ export function CheckoutForm() {
       address: "",
       phone: "",
       shippingMethod: "free",
-      wallet: "metamask",
       saveInfo: false,
     },
   });
@@ -91,18 +91,6 @@ export function CheckoutForm() {
         ),
       });
     }, 3000);
-  }
-
-  function connectWallet(_data: { wallet: string }) {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsWalletConnected(true);
-      setShowWalletModal(false);
-      toast.success("Wallet connected successfully!", {
-        description: "You can now proceed with the checkout.",
-      });
-    }, 2000);
   }
 
   return (
@@ -133,119 +121,7 @@ export function CheckoutForm() {
             <DialogHeader>
               <DialogTitle>Connect Wallet</DialogTitle>
             </DialogHeader>
-            <div className="space-y-8 py-4">
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="wallet"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="space-y-3"
-                        >
-                          <div className="group flex items-center justify-between space-x-2 rounded-lg border p-4 transition-colors duration-300 hover:bg-gray-50">
-                            <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="metamask" id="metamask" />
-                              <img
-                                src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
-                                alt="MetaMask"
-                                className="size-8 transition-transform duration-100 group-hover:scale-110"
-                              />
-                              <FormLabel
-                                htmlFor="metamask"
-                                className="font-medium hover:cursor-pointer"
-                              >
-                                MetaMask
-                              </FormLabel>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Popular
-                            </div>
-                          </div>
-
-                          <div className="group flex items-center justify-between space-x-2 rounded-lg border p-4 transition-colors duration-300 hover:bg-gray-50">
-                            <div className="flex items-center space-x-3">
-                              <RadioGroupItem
-                                value="walletconnect"
-                                id="walletconnect"
-                              />
-                              <img
-                                src="https://avatars.githubusercontent.com/u/37784886"
-                                alt="WalletConnect"
-                                className="size-8 rounded-full transition-transform duration-100 group-hover:scale-110"
-                              />
-                              <FormLabel
-                                htmlFor="walletconnect"
-                                className="font-medium hover:cursor-pointer"
-                              >
-                                WalletConnect
-                              </FormLabel>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Universal
-                            </div>
-                          </div>
-
-                          <div className="group flex items-center justify-between space-x-2 rounded-lg border p-4 transition-colors duration-300 hover:bg-gray-50">
-                            <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="coinbase" id="coinbase" />
-                              <img
-                                src="https://avatars.githubusercontent.com/u/1885080"
-                                alt="Coinbase Wallet"
-                                className="size-8 rounded-full transition-transform duration-100 group-hover:scale-110"
-                              />
-                              <FormLabel
-                                htmlFor="coinbase"
-                                className="font-medium hover:cursor-pointer"
-                              >
-                                Coinbase Wallet
-                              </FormLabel>
-                            </div>
-                          </div>
-
-                          <div className="group flex items-center justify-between space-x-2 rounded-lg border p-4 transition-colors duration-300 hover:bg-gray-50">
-                            <div className="flex items-center space-x-3">
-                              <RadioGroupItem value="phantom" id="phantom" />
-                              <img
-                                src="https://avatars.githubusercontent.com/u/78782331"
-                                alt="Phantom"
-                                className="size-8 transition-transform duration-100 group-hover:scale-110"
-                              />
-                              <FormLabel
-                                htmlFor="phantom"
-                                className="font-medium hover:cursor-pointer"
-                              >
-                                Phantom
-                              </FormLabel>
-                            </div>
-                          </div>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button
-                type="button"
-                disabled={isLoading}
-                className="relative w-full overflow-hidden transition-colors"
-                onClick={() =>
-                  connectWallet({
-                    wallet: form.getValues("wallet"),
-                  })
-                }
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <Wallet className="size-5" />
-                  Connect Wallet
-                </span>
-              </Button>
-            </div>
+            <WalletConnect onSuccess={() => setShowWalletModal(false)} />
           </DialogContent>
         </Dialog>
 
