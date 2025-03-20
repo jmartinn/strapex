@@ -184,9 +184,9 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       modalTheme: "dark",
     });
     console.log("Attempting to connect");
-    if (wallet && wallet.isConnected) {
+    if (wallet && wallet?.isConnected) {
       setConnection(wallet);
-      setAccount(wallet.account);
+      setAccount(wallet?.account);
       setAddress(connectorData?.account!);
     } else {
       return;

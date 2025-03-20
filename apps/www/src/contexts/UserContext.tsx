@@ -186,7 +186,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     console.log("User logged in: ", userId);
 
     setConnection(wallet);
-    // @ts-expect-error this is still what is gotten for the time being
     setAccount(wallet?.account);
     setAddress(connectorData?.account!);
     setUserId(userId ?? null);
