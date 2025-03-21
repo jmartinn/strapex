@@ -193,6 +193,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     console.log(isLoggedIn)
   };
 
+  const switchChain = async () => {
+    if (connection || connection === null) return
+    
+
+  }
+
   const logout = async () => {
     await disconnect({
       clearLastWallet: true,
