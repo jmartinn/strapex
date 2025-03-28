@@ -14,9 +14,6 @@
       ]
     },
     "incremental": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "preserve"
   },
   "include": [
     "**/*.ts",

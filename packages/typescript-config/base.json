@@ -6,14 +6,7 @@
     "moduleDetection": "force",
 
     "module": "NodeNext",
-    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
-
-    "jsx": "preserve",
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
 
     "strict": true,
