@@ -39,7 +39,7 @@ model Token {
   id               Int             @id @default(autoincrement())
   image            String
   ticker           String
-  address          String
+  address          String          @unique
   sepolia_address  String
   balance_selector String
   decimals         Int
