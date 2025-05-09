@@ -66,12 +66,12 @@ model Product {
 }
 
 model Session {
-  id                          Int        @id @default(autoincrement())
-  session_id                  String     @unique
+  id                          Int         @id @default(autoincrement())
+  session_id                  String      @unique
   biz_wallet_id               Int
-  total_price                 Decimal    @db.Decimal(15, 2)
+  total_price                 Decimal     @db.Decimal(15, 2)
   total_price_token_id        Int
-  payment_type                String
+  payment_type                PaymentType
   success_url                 String
   cancel_url                  String
   deposit_address             String
