@@ -15,7 +15,8 @@ model User {
   starknet_address String      @unique
   created_at       DateTime    @default(now())
   updated_at       DateTime    @updatedAt
-  bizWallets       BizWallet[]
+
+  @@index([starknet_address])
 }
 
 model BizWallet {
