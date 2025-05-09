@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int         @id @default(autoincrement())
+  starknet_address String      @unique
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+
+  @@index([starknet_address])
+}
+
+model BizWallet {
+  id               Int             @id @default(autoincrement())
+  user_id          Int
+  name             String
+  description      String
+  tags             String
+  api_key          String          @unique
+  contract_address String          @unique
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  user             User            @relation(fields: [user_id], references: [id])
+  products         Product[]
+  sessions         Session[]
+  walletBalances   WalletBalance[]
+}
+
+model Token {
+  id               Int             @id @default(autoincrement())
+  image            String
+  ticker           String
+  address          String          @unique
+  sepolia_address  String
+  balance_selector String
+  decimals         Int
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  products         Product[]
+  sessions         Session[]       @relation("TotalPriceToken")
+  lineItems        LineItem[]
+  walletBalances   WalletBalance[]
+}
+
+model Product {
+  id            Int         @id @default(autoincrement())
+  biz_wallet_id Int
+  payment_type  PaymentType
+  name          String
+  price         Decimal     @db.Decimal(15, 2)
+  token_id      Int
+  address       String?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  bizWallet     BizWallet   @relation(fields: [biz_wallet_id], references: [id])
+  token         Token       @relation(fields: [token_id], references: [id])
+  lineItems     LineItem[]
+}
+
+model Session {
+  id                          Int         @id @default(autoincrement())
+  session_id                  String      @unique
+  biz_wallet_id               Int
+  total_price                 Decimal     @db.Decimal(15, 2)
+  total_price_token_id        Int
+  payment_type                PaymentType
+  success_url                 String
+  cancel_url                  String
+  deposit_address             String
+  status                      String
+  billing_address_collection  String?
+  shipping_address_collection String?
+  shipping_address            Json?
+  contact_information         Json?
+  created_at                  DateTime   @default(now())
+  updated_at                  DateTime   @updatedAt
+  bizWallet                   BizWallet  @relation(fields: [biz_wallet_id], references: [id])
+  totalPriceToken             Token      @relation("TotalPriceToken", fields: [total_price_token_id], references: [id])
+  lineItems                   LineItem[]
+}
+
+model LineItem {
+  id         Int      @id @default(autoincrement())
+  session_id Int
+  product_id Int
+  quantity   Int
+  price      Decimal  @db.Decimal(15, 2)
+  token_id   Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  session    Session  @relation(fields: [session_id], references: [id])
+  product    Product  @relation(fields: [product_id], references: [id])
+  token      Token    @relation(fields: [token_id], references: [id])
+}
+
+model WalletBalance {
+  id            Int       @id @default(autoincrement())
+  biz_wallet_id Int
+  token_id      Int
+  balance       Decimal   @db.Decimal(15, 2)
+  updated_at    DateTime  @updatedAt
+  bizWallet     BizWallet @relation(fields: [biz_wallet_id], references: [id])
+  token         Token     @relation(fields: [token_id], references: [id])
+}
+
+enum PaymentType {
+  onetime
+  recurring // This `recurring` type was just for testing purposes as noted in a review so it can be safely removed
+}
