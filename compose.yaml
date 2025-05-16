@@ -1,11 +1,11 @@
 include:
   - path:
-      - apps/supabase/docker-compose.yml
-      - apps/supabase/dev/docker-compose.dev.yml
+      - packages/database/supabase/docker-compose.yml
+      - packages/database/supabase/dev/docker-compose.dev.yml
 services:
   katana:
     image: ghcr.io/dojoengine/katana:v1.5.0
-    command: katana --silent --explorer --dev --dev.no-fee --http.addr 0.0.0.0 --http.cors_origins "*"
+    command: katana --explorer --dev --dev.no-fee --http.addr 0.0.0.0 --http.cors_origins "*"
     ports:
       - 5050:5050
     healthcheck:

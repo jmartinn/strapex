@@ -37,7 +37,7 @@ By contributing to this project, you agree to abide by the terms outlined in our
 After cloning the repository, duplicate both `.env.example` environment configuration files under `apps/supabase` and `apps/www`:
 
 ```sh
-cp apps/supabase/.env.example apps/supabase/.env
+cp packages/database/supabase/.env.example packages/database/supabase/.env
 cp apps/www/.env.example apps/www/.env
 ```
 
@@ -46,7 +46,7 @@ This command will launch everything needed to work with Strapex:
 
 - Katana (Starknet Devnet) at http://localhost:5050 along with an explorer at http://localhost:5050/explorer
 - Supabase local development studio at http://localhost:8082
-- Strapex frontend at http://localhost:3000
+- Strapex frontend at http://localhost:3333
 
 To interact with the Strapex contracts in the frontend, you will need to add the Katana Devnet in your Wallet networks:
 
@@ -56,6 +56,16 @@ To interact with the Strapex contracts in the frontend, you will need to add the
 - Account class hash: 0x07dc7899aa655b0aae51eadff6d801a58e97dd99cf4666ee59e704249e51adf2
 - Fee Token Address: 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d
 - Block explorer URL: http://localhost:5050/explorer
+
+### **Viewing and importing Katana accounts**
+
+To view all pre-deployed Katana accounts and their private keys, run:
+
+```sh
+docker compose logs katana | grep -A 2 -B 2 "Private key"
+```
+
+This will display all available accounts with their addresses, private keys, and public keys.
 
 Then import one of Katana predeployed funded accounts in your Wallet using its private key:
 
@@ -72,7 +82,7 @@ Then import one of Katana predeployed funded accounts in your Wallet using its p
 
 ## **Future Improvements**
 
-We’re committed to continuously improving Strapex. If you have feature requests, bug reports, or general feedback, feel free to:
+We're committed to continuously improving Strapex. If you have feature requests, bug reports, or general feedback, feel free to:
 
 1. Open an issue in this repository.
 2. Join our [Telegram](https://t.me/strapexlabs) and share your ideas.

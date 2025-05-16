@@ -436,7 +436,9 @@ services:
       retries: 3
     environment:
       LOGFLARE_API_KEY: ${LOGFLARE_API_KEY}
-    command: ["--config", "/etc/vector/vector.yml"]
+    command: ["--config", "/etc/vector/vector.yml", "--quiet"]
+    logging:
+      driver: "none"
     security_opt:
       - "label=disable"
 
