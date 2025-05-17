@@ -41,6 +41,12 @@ cp packages/database/supabase/.env.example packages/database/supabase/.env
 cp apps/www/.env.example apps/www/.env
 ```
 
+## **Database Setup**
+
+cd packages/database && pnpx supabase start
+
+Note: First-time startup may take several minutes as it downloads Docker images and sets up services.
+
 We use Docker to launch every components of Strapex in development mode, make sure to install Docker on your system then run `docker compose up` in the root directory.
 This command will launch everything needed to work with Strapex:
 

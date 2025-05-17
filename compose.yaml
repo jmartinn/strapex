@@ -1,7 +1,3 @@
-include:
-  - path:
-      - packages/database/supabase/docker-compose.yml
-      - packages/database/supabase/dev/docker-compose.dev.yml
 services:
   katana:
     image: ghcr.io/dojoengine/katana:v1.5.0
@@ -37,4 +33,3 @@ services:
       - 3333:3333
     depends_on:
       - contracts
-      - storage
