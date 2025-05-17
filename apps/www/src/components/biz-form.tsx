@@ -1,24 +1,29 @@
 "use client";
+import {
+  useAccount,
+  useNetwork,
+  useContract,
+  useSendTransaction,
+  useReadContract,
+  useProvider,
+} from "@starknet-react/core";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { CallData, Contract, cairo, num, BigNumberish } from "starknet";
+import { CallData, cairo, BigNumberish } from "starknet";
 
-import abi from "../abis/abi.json";
-
+import abi from "@/abis/abi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useProvider } from "@/contexts/ProviderContext";
+import { useProvider as useProviderContext } from "@/contexts/ProviderContext";
 import { useUser } from "@/contexts/UserContext";
-import { saveBusinessData } from "@/services/databaseService";
-import { BizWallet } from "@/types";
+import { saveBusinessData, BusinessData } from "@/services/database";
+import { getRoute } from "@/utils/getRoute";
 
 // Add additional styles for overriding dark mode background
 const overrideDarkStyles =
   "dark:bg-white dark:border-gray-200 dark:placeholder:text-gray-500";
 
-import { usePathname, useRouter } from "next/navigation";
-
-import { getRoute } from "@/utils/getRoute";
 function generateApiKey() {
   return (
     Math.random().toString(36).substring(2, 15) +
@@ -26,9 +31,13 @@ function generateApiKey() {
   );
 }
 
-const FACTORY_ADDRESSES: { [key: string]: string | undefined } = {
-  mainnet: process.env.NEXT_PUBLIC_MAINNET_FACTORY_ADDRESS,
-  sepolia: process.env.NEXT_PUBLIC_SEPOLIA_FACTORY_ADDRESS,
+const FACTORY_ADDRESSES: Record<
+  "katana" | "sepolia" | "mainnet",
+  `0x${string}` | undefined
+> = {
+  katana: process.env.NEXT_PUBLIC_KATANA_FACTORY_ADDRESS as `0x${string}` | undefined,
+  sepolia: process.env.NEXT_PUBLIC_SEPOLIA_FACTORY_ADDRESS as `0x${string}` | undefined,
+  mainnet: process.env.NEXT_PUBLIC_MAINNET_FACTORY_ADDRESS as `0x${string}` | undefined,
 };
 
 export function BizForm() {
@@ -40,12 +49,32 @@ export function BizForm() {
   const pathname = usePathname();
 
   const userContext = useUser();
-  const providerContext = useProvider();
+  const providerContext = useProviderContext();
+  const { account, isConnected } = useAccount();
+  const { chain } = useNetwork();
+  const factoryAddress =
+    FACTORY_ADDRESSES[chain.network as "katana" | "sepolia" | "mainnet"];
+  const { contract } = useContract({
+    abi,
+    address: factoryAddress,
+  });
+  const { sendAsync: createStrapexContract } = useSendTransaction({
+    calls: contract
+      ? [contract.populate("create_strapex_contract", [])]
+      : undefined,
+  });
+  const { data: getUserStrapexAccount } = useReadContract({
+    abi,
+    functionName: "getUserStrapexAccount",
+    address: factoryAddress,
+    args: account?.address ? [account.address] : undefined,
+  });
+  const { provider } = useProvider();
 
   //If the component loads and the user is not logged in, we call the userContext.login()
   useEffect(() => {
-    if (!userContext?.isLoggedIn) {
-      userContext?.login();
+    if (!isConnected && userContext) {
+      userContext.login();
     }
   }, []);
 
@@ -53,7 +82,7 @@ export function BizForm() {
     e.preventDefault();
     const apiKey = generateApiKey();
     console.log(apiKey);
-    if (!userContext?.address) {
+    if (!account) {
       alert("Please connect your wallet first!");
       return;
     }
@@ -61,16 +90,17 @@ export function BizForm() {
       setIsLoading(true); // Set loading state to true
       const contractAddress = await createContract();
       if (contractAddress) {
-        const businessData: BizWallet = {
+        alert(`Your Strapex contract address is: ${contractAddress}`);
+        const businessData: BusinessData = {
           name,
           description,
           tags,
           apiKey,
-          ownerAddress: userContext.address,
+          ownerAddress: account.address,
           contractAddress,
-          createdAt: new Date(),
         };
-        await saveBusinessData(businessData, providerContext);
+        console.log("Saving business data:", businessData);
+        await saveBusinessData(businessData);
         alert("Business data saved successfully!");
         router.push(getRoute("/accounts", pathname)); // Redirect to account page
       }
@@ -83,92 +113,37 @@ export function BizForm() {
   };
 
   const createContract = async () => {
-    if (!userContext?.address) {
-      alert("Please connect your wallet first!");
-      return;
-    }
-
-    const factoryAddress = FACTORY_ADDRESSES[providerContext?.network || ""];
-    if (!factoryAddress) {
-      alert("Factory contact missing in env");
-      return;
-    }
-
-    const transactions = [
-      {
-        contractAddress: factoryAddress,
-        entrypoint: "create_strapex_contract",
-        calldata: [],
-      },
-    ];
-
-    // Placeholder for ABI and transaction details, adjust as necessary
-    //const abi = undefined; // Define if you have ABI details
-    const transactionsDetail = {
-      maxFee: undefined, // Define if you have a max fee
-      nonce: undefined, // Define if you have a nonce
-      version: 1, // Use default or specify if different
-    };
-
-    if (userContext?.account) {
-      const multiCall = await userContext.account.execute(transactions);
-      if (multiCall) {
-        const hx = multiCall.transaction_hash;
-        console.log(`Transaction hash: ${hx}`);
-        alert(`Transaction hash: ${hx}`);
-        console.log("Multicall", multiCall);
-        const result = await providerContext?.provider.waitForTransaction(
-          multiCall.transaction_hash,
-        );
-        console.log("Result", result);
-        if (result && result.events.length > 0) {
-          const contractAddress = result.events[0].keys[3];
-          console.log(`Deployed Strapex contract address: ${contractAddress}`);
-          alert(`Deployed Strapex contract address: ${contractAddress}`);
-          return contractAddress; // Return the contract address
-        }
+    const { transaction_hash: hash } = await createStrapexContract();
+    const result = await provider.waitForTransaction(hash);
+    
+    // Safely access transaction receipt data
+    try {
+      // Access receipt data safely based on the actual response structure
+      // This will need to be adjusted based on the actual starknet.js API
+      const receipt = result as any; // Type assertion to get around type checking
+      
+      if (receipt && 
+          receipt.events && 
+          Array.isArray(receipt.events) && 
+          receipt.events.length > 0 &&
+          receipt.events[0]?.keys &&
+          receipt.events[0]?.keys.length > 3) {
+        const contractAddress = receipt.events[0].keys[3];
+        console.log(`Deployed Strapex contract address: ${contractAddress}`);
+        return contractAddress;
       }
+    } catch (error) {
+      console.error("Error processing transaction receipt:", error);
     }
+    
     return null; // Return null if contract deployment fails
   };
 
   const getBizOwnerContract = async () => {
-    if (!userContext?.address) {
-      alert("Please connect your wallet first!");
-      return;
-    }
-
-    const factoryAddress = FACTORY_ADDRESSES[providerContext?.network || ""];
-    if (!factoryAddress) {
-      alert("Factory contact missing in env");
-      return;
-    }
-
-    const mycontract = new Contract(
-      abi,
-      factoryAddress,
-      providerContext?.provider,
-    );
-
-    const me = await mycontract.getUserStrapexAccount(userContext?.address);
-    const stringAddress = num.toHex(me);
-    alert(`Your Strapex contract address is: ${stringAddress}`);
-  };
-
-  const testingStarknetJs = async () => {
-    const factoryAddress = FACTORY_ADDRESSES[providerContext?.network || ""];
-    if (!factoryAddress) {
-      alert("Factory contact missing in env");
-      return;
-    }
-
-    const myTestContract = new Contract(
-      abi,
-      factoryAddress,
-      providerContext?.provider,
-    );
-    const result = myTestContract.test();
-    console.log(result);
+    if (!getUserStrapexAccount) return;
+    
+    const contractAddress = `0x${BigInt(getUserStrapexAccount.toString()).toString(16)}`;
+    alert(`Your Strapex contract address is: ${contractAddress}`);
   };
 
   const aproveAndDepositToContract = async () => {
@@ -273,8 +248,7 @@ export function BizForm() {
           Create Account
         </Button>
       </form>
-      {/*
-      <Button className="w-full" onClick={getBizOwnerContract}>
+      {/*<Button className="w-full" onClick={getBizOwnerContract}>
         Get Biz Owner Contract
       </Button>
 

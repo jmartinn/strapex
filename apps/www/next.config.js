@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    transpilePackages: ['@strapex/database'],
     async rewrites() {
       return [
         {

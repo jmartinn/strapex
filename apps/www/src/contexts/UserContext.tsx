@@ -1,4 +1,10 @@
 "use client";
+import {
+  useDisconnect,
+  useAccount,
+  useConnect,
+  Connector,
+} from "@starknet-react/core";
 import dotenv from "dotenv";
 import {
   ReactNode,
@@ -7,16 +13,14 @@ import {
   useEffect,
   useState,
 } from "react";
-import * as Realm from "realm-web";
-import { Account, Contract, num } from "starknet";
-import { StarknetWindowObject, connect, disconnect } from "starknetkit";
-
-import { useProvider } from "./ProviderContext";
-import { app } from "../../realmconfig";
-import abi from "../abis/abi.json";
-import { useAccount } from '@starknet-react/core'
+import {
+  StarknetWindowObject,
+  useStarknetkitConnectModal,
+  StarknetkitConnector,
+} from "starknetkit";
 
 dotenv.config();
+
 export enum UserMode {
   OWNER = "owner",
   MULTIOWNER = "multiowner",
@@ -29,25 +33,55 @@ interface UserContextType {
   logout: () => void;
   toggleMode: () => void;
   connection: StarknetWindowObject | null;
-  account: Account | null;
   contractAddress: string | null;
-  address: string | undefined | null;
-  userId: string | null; // Added userId to the context
+  userId: string | null;
+  account: any;
+  address: string | null;
 }
 
 const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const { disconnect } = useDisconnect();
+  const { connect, connectors } = useConnect();
+  const { starknetkitConnectModal } = useStarknetkitConnectModal({
+    connectors: connectors as unknown as StarknetkitConnector[],
+    modalMode: "alwaysAsk",
+    modalTheme: "dark",
+    dappName: "Strapex",
+    resultType: "wallet",
+  });
+  const connectWallet = async () => {
+    const { connector } = await starknetkitConnectModal();
+    if (!connector) {
+      return;
+    }
+    await connect({ connector: connector as unknown as Connector });
+  };
+  const useAccountResult = useAccount();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userMode, setUserMode] = useState<UserMode>(UserMode.OWNER);
   const [connection, setConnection] = useState<StarknetWindowObject | null>(
-    null,
+    null
   );
-  const [account, setAccount] = useState<Account | null>(null);
-  const [address, setAddress] = useState<string | null>(null);
   const [contractAddress, setContractAddress] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null); // Added state for userId
-  const providerContext = useProvider();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [account, setAccount] = useState<any>(null);
+  const [address, setAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onLogin = async (address: string) => {
+      // Simplified login process without JWT and Realm
+      const userId = "user-id";
+      setAddress(address);
+      setUserId(userId);
+      setIsLoggedIn(true);
+    };
+    if (useAccountResult.isConnected && useAccountResult.address) {
+      setAccount(useAccountResult.account);
+      onLogin(useAccountResult.address);
+    }
+  }, [useAccountResult.isConnected, useAccountResult.address, useAccountResult.account]);
 
   useEffect(() => {
     // This effect runs only on the client side
@@ -62,7 +96,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserMode(storedUserMode as UserMode);
       }
 
-      const storedUserId = localStorage.getItem("userId"); // Retrieve userId from localStorage
+      const storedUserId = localStorage.getItem("userId");
       if (storedUserId !== null) {
         setUserId(storedUserId);
       }
@@ -71,23 +105,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (storedConnection !== null) {
         setConnection(JSON.parse(storedConnection));
       }
-
-      const storedAccount = localStorage.getItem("account");
-      if (storedAccount !== null) {
-        setAccount(JSON.parse(storedAccount));
-      }
-
-      const storedAddress = localStorage.getItem("address");
-      if (storedAddress !== null) {
-        setAddress(storedAddress);
-      }
     }
-  }, []);
+  }, [useAccountResult.isConnected]);
 
   // Effect to persist isLoggedIn state to localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      console.log(isLoggedIn);
       localStorage.setItem("isLoggedIn", JSON.stringify(isLoggedIn));
     }
   }, [isLoggedIn]);
@@ -127,92 +150,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [address]);
 
-  // Effect to log out user when provider changes
-  useEffect(() => {
-    if (providerContext) {
-      const { switchNetwork } = providerContext;
-      const originalSwitchNetwork = switchNetwork;
-
-      providerContext.switchNetwork = async (newNetwork: string) => {
-        await logout();
-        originalSwitchNetwork(newNetwork);
-      };
-    }
-  }, [providerContext]);
-
   const login = async () => {
-    const res = await connect({
-      modalMode: "alwaysAsk",
-      modalTheme: "dark",
-      dappName: "Strapex",
-      resultType: "wallet",
-    });
-
-    const { wallet, connector, connectorData } = res
-    console.log(wallet)
-    console.log(connector)
-    console.log(connectorData)
-    console.log(connectorData?.account)
-    console.log(typeof connectorData?.account)
-
-    const chainId = await wallet?.request({
-      type: "wallet_requestChainId"
-    })
-
-    console.log(chainId)
-
-    if (!wallet || !connector || !connectorData) {
-      console.log('No wallet, connector or connectorData')
-      return null
-    }
-
-    const response = await fetch("/api/generateJWToken", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // Braavos wallet returns a value of undefined for selectedAddress property of a wallet, so it is a problem
-      body: JSON.stringify({ walletAddress: connectorData?.account }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to generate JWT token");
-    }
-
-    const { token } = await response.json();
-
-    await app.logIn(Realm.Credentials.jwt(token));
-    const userId = app.currentUser?.id;
-    console.log("User logged in: ", userId);
-
-    setConnection(wallet);
-    setAccount(wallet?.account);
-    setAddress(connectorData?.account!);
-    setUserId(userId ?? null);
-    setIsLoggedIn(true);
-    console.log(isLoggedIn)
+    await connectWallet();
   };
 
   const switchChain = async () => {
-    if (connection || connection === null) return
-    
-
-  }
+    if (connection || connection === null) return;
+  };
 
   const logout = async () => {
-    await disconnect({
-      clearLastWallet: true,
-    });
+    disconnect();
     setIsLoggedIn(false);
     setConnection(null);
+    setUserId(null);
     setAccount(null);
     setAddress(null);
-    setUserId(null);
   };
 
   const toggleMode = () =>
     setUserMode(
-      userMode === UserMode.OWNER ? UserMode.MULTIOWNER : UserMode.OWNER,
+      userMode === UserMode.OWNER ? UserMode.MULTIOWNER : UserMode.OWNER
     );
 
   return (
@@ -224,10 +181,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         logout,
         toggleMode,
         connection,
+        contractAddress,
+        userId,
         account,
         address,
-        contractAddress,
-        userId, // Provide userId in the context value
       }}
     >
       {children}
