@@ -147,6 +147,9 @@ importers:
       '@starknet-react/core':
         specifier: ^3.7.4
         version: 3.7.4(get-starknet-core@3.3.4(starknet@6.24.1))(react@18.3.1)(starknet@6.24.1)(typescript@5.7.3)
+      '@strapex/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@strapex/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -281,9 +284,15 @@ importers:
         specifier: ^6.8.2
         version: 6.8.2(prisma@6.8.2(typescript@5.7.3))(typescript@5.7.3)
     devDependencies:
+      prisma:
+        specifier: ^6.8.2
+        version: 6.8.2(typescript@5.7.3)
       supabase:
         specifier: 2.22.12
         version: 2.22.12
+      typescript:
+        specifier: ^5.3.0
+        version: 5.7.3
 
   packages/env:
     dependencies:
@@ -11095,13 +11104,10 @@ snapshots:
   '@prisma/config@6.8.2':
     dependencies:
       jiti: 2.4.2
-    optional: true
 
-  '@prisma/debug@6.8.2':
-    optional: true
+  '@prisma/debug@6.8.2': {}
 
-  '@prisma/engines-version@6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e':
-    optional: true
+  '@prisma/engines-version@6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e': {}
 
   '@prisma/engines@6.8.2':
     dependencies:
@@ -11109,19 +11115,16 @@ snapshots:
       '@prisma/engines-version': 6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e
       '@prisma/fetch-engine': 6.8.2
       '@prisma/get-platform': 6.8.2
-    optional: true
 
   '@prisma/fetch-engine@6.8.2':
     dependencies:
       '@prisma/debug': 6.8.2
       '@prisma/engines-version': 6.8.0-43.2060c79ba17c6bb9f5823312b6f6b7f4a845738e
       '@prisma/get-platform': 6.8.2
-    optional: true
 
   '@prisma/get-platform@6.8.2':
     dependencies:
       '@prisma/debug': 6.8.2
-    optional: true
 
   '@protobufjs/aspromise@1.1.2': {}
 
@@ -17895,7 +17898,6 @@ snapshots:
       '@prisma/engines': 6.8.2
     optionalDependencies:
       typescript: 5.7.3
-    optional: true
 
   proc-log@5.0.0: {}
 

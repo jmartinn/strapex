@@ -18,18 +18,3 @@ services:
     depends_on:
       katana:
         condition: service_healthy
-
-  www:
-    build:
-      context: apps/www
-      additional_contexts:
-        - root=.
-    restart: always
-    volumes:
-      - ./apps/www:/home/strapex/apps/www
-      - /home/strapex/apps/www/.next
-      - /home/strapex/apps/www/node_modules
-    ports:
-      - 3333:3333
-    depends_on:
-      - contracts
