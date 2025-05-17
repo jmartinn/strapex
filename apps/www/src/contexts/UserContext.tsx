@@ -13,14 +13,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import * as Realm from "realm-web";
 import {
   StarknetWindowObject,
   useStarknetkitConnectModal,
   StarknetkitConnector,
 } from "starknetkit";
-
-import { app } from "../../realmconfig";
 
 dotenv.config();
 
@@ -37,7 +34,9 @@ interface UserContextType {
   toggleMode: () => void;
   connection: StarknetWindowObject | null;
   contractAddress: string | null;
-  userId: string | null; // Added userId to the context
+  userId: string | null;
+  account: any;
+  address: string | null;
 }
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -66,34 +65,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     null
   );
   const [contractAddress, setContractAddress] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null); // Added state for userId
+  const [userId, setUserId] = useState<string | null>(null);
+  const [account, setAccount] = useState<any>(null);
+  const [address, setAddress] = useState<string | null>(null);
 
   useEffect(() => {
     const onLogin = async (address: string) => {
-      const response = await fetch("/api/generateJWToken", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // Braavos wallet returns a value of undefined for selectedAddress property of a wallet, so it is a problem
-        body: JSON.stringify({ walletAddress: address }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to generate JWT token");
-      }
-      const { token } = await response.json();
-      console.log({ token });
-      // await app.logIn(Realm.Credentials.jwt(token));
-      // const userId = app.currentUser?.id;
+      // Simplified login process without JWT and Realm
       const userId = "user-id";
-      // setAccount(walletAccount);
-      // setAddress(address);
-      setUserId(userId ?? null);
+      setAddress(address);
+      setUserId(userId);
       setIsLoggedIn(true);
     };
     if (useAccountResult.isConnected && useAccountResult.address) {
-      //setAccount(useAccountResult.account);
+      setAccount(useAccountResult.account);
       onLogin(useAccountResult.address);
     }
-  }, [useAccountResult.isConnected, useAccountResult.address]);
+  }, [useAccountResult.isConnected, useAccountResult.address, useAccountResult.account]);
 
   useEffect(() => {
     // This effect runs only on the client side
@@ -108,7 +96,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserMode(storedUserMode as UserMode);
       }
 
-      const storedUserId = localStorage.getItem("userId"); // Retrieve userId from localStorage
+      const storedUserId = localStorage.getItem("userId");
       if (storedUserId !== null) {
         setUserId(storedUserId);
       }
@@ -148,18 +136,19 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [connection]);
 
-  // Effect to log out user when provider changes
-  /* useEffect(() => {
-    if (providerContext) {
-      const { switchNetwork } = providerContext;
-      const originalSwitchNetwork = switchNetwork;
-
-      providerContext.switchNetwork = async (newNetwork: string) => {
-        await logout();
-        originalSwitchNetwork(newNetwork);
-      };
+  // Effect to persist account state to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("account", JSON.stringify(account));
     }
-  }, [providerContext]); */
+  }, [account]);
+
+  // Effect to persist address state to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("address", address ?? "");
+    }
+  }, [address]);
 
   const login = async () => {
     await connectWallet();
@@ -173,9 +162,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     disconnect();
     setIsLoggedIn(false);
     setConnection(null);
-    // setAccount(null);
-    // setAddress(null);
     setUserId(null);
+    setAccount(null);
+    setAddress(null);
   };
 
   const toggleMode = () =>
@@ -193,7 +182,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         toggleMode,
         connection,
         contractAddress,
-        userId, // Provide userId in the context value
+        userId,
+        account,
+        address,
       }}
     >
       {children}

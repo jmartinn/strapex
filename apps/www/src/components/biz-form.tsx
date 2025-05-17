@@ -17,8 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useProvider as useProviderContext } from "@/contexts/ProviderContext";
 import { useUser } from "@/contexts/UserContext";
-import { saveBusinessData } from "@/services/databaseService";
-import { BizWallet } from "@/types";
+import { saveBusinessData, BusinessData } from "@/services/database";
 import { getRoute } from "@/utils/getRoute";
 
 // Add additional styles for overriding dark mode background
@@ -34,11 +33,11 @@ function generateApiKey() {
 
 const FACTORY_ADDRESSES: Record<
   "katana" | "sepolia" | "mainnet",
-  string | undefined
+  `0x${string}` | undefined
 > = {
-  katana: process.env.NEXT_PUBLIC_KATANA_FACTORY_ADDRESS,
-  sepolia: process.env.NEXT_PUBLIC_SEPOLIA_FACTORY_ADDRESS,
-  mainnet: process.env.NEXT_PUBLIC_MAINNET_FACTORY_ADDRESS,
+  katana: process.env.NEXT_PUBLIC_KATANA_FACTORY_ADDRESS as `0x${string}` | undefined,
+  sepolia: process.env.NEXT_PUBLIC_SEPOLIA_FACTORY_ADDRESS as `0x${string}` | undefined,
+  mainnet: process.env.NEXT_PUBLIC_MAINNET_FACTORY_ADDRESS as `0x${string}` | undefined,
 };
 
 export function BizForm() {
@@ -68,7 +67,7 @@ export function BizForm() {
     abi,
     functionName: "getUserStrapexAccount",
     address: factoryAddress,
-    args: [account?.address],
+    args: account?.address ? [account.address] : undefined,
   });
   const { provider } = useProvider();
 
@@ -92,18 +91,18 @@ export function BizForm() {
       const contractAddress = await createContract();
       if (contractAddress) {
         alert(`Your Strapex contract address is: ${contractAddress}`);
-        /* const businessData: BizWallet = {
+        const businessData: BusinessData = {
           name,
           description,
           tags,
           apiKey,
           ownerAddress: account.address,
           contractAddress,
-          createdAt: new Date(),
         };
-        await saveBusinessData(businessData, providerContext);
+        console.log("Saving business data:", businessData);
+        await saveBusinessData(businessData);
         alert("Business data saved successfully!");
-        router.push(getRoute("/accounts", pathname)); // Redirect to account page */
+        router.push(getRoute("/accounts", pathname)); // Redirect to account page
       }
     } catch (error) {
       console.error("Error saving business data or executing contract:", error);
@@ -114,26 +113,36 @@ export function BizForm() {
   };
 
   const createContract = async () => {
-    // Placeholder for ABI and transaction details, adjust as necessary
-    //const abi = undefined; // Define if you have ABI details
-    const transactionsDetail = {
-      maxFee: undefined, // Define if you have a max fee
-      nonce: undefined, // Define if you have a nonce
-      version: 1, // Use default or specify if different
-    };
-
     const { transaction_hash: hash } = await createStrapexContract();
     const result = await provider.waitForTransaction(hash);
-    if (result.isSuccess() && result.events.length > 0) {
-      const contractAddress = result.events[0]!.keys[3]!;
-      console.log(`Deployed Strapex contract address: ${contractAddress}`);
-      return contractAddress;
+    
+    // Safely access transaction receipt data
+    try {
+      // Access receipt data safely based on the actual response structure
+      // This will need to be adjusted based on the actual starknet.js API
+      const receipt = result as any; // Type assertion to get around type checking
+      
+      if (receipt && 
+          receipt.events && 
+          Array.isArray(receipt.events) && 
+          receipt.events.length > 0 &&
+          receipt.events[0]?.keys &&
+          receipt.events[0]?.keys.length > 3) {
+        const contractAddress = receipt.events[0].keys[3];
+        console.log(`Deployed Strapex contract address: ${contractAddress}`);
+        return contractAddress;
+      }
+    } catch (error) {
+      console.error("Error processing transaction receipt:", error);
     }
+    
     return null; // Return null if contract deployment fails
   };
 
   const getBizOwnerContract = async () => {
-    const contractAddress = `0x${BigInt(getUserStrapexAccount).toString(16)}`;
+    if (!getUserStrapexAccount) return;
+    
+    const contractAddress = `0x${BigInt(getUserStrapexAccount.toString()).toString(16)}`;
     alert(`Your Strapex contract address is: ${contractAddress}`);
   };
 
